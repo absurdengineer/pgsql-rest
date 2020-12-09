@@ -18,6 +18,9 @@ const validateStudent = student => {
 router.get('/',async (req, res) => {
     try{
         const result = await pool.query('SELECT * FROM students')
+        if(result.rowCount === 0){
+            return res.status(200).send("No Data is available in this API.")
+        }
         return res.status(200).json(result.rows)
     }catch(error) {
         console.error(`Error : ${error.message}`)
@@ -27,7 +30,7 @@ router.get('/:id',async (req, res) => {
     try{
         const id = parseInt(req.params.id)
         const result = await pool.query(`SELECT * FROM students WHERE id=${id};`)
-        if(!result.rows[0])
+        if(result.rowCount === 0)
             res.status(404).send("Invalid Id")
         return res.status(200).json(result.rows[0])
     }catch(error) {
@@ -49,7 +52,7 @@ router.put('/:id',async (req, res) => {
     try{
         const id = parseInt(req.params.id)
         let result = await pool.query(`SELECT * FROM students WHERE id=${id};`)
-        if(!result.rows[0])
+        if(result.rowCount === 0)
             res.status(404).send("Invalid Id")
         const {error} = validateStudent(req.body)
         if(error) return res.status(400).send(error.message)
@@ -64,7 +67,7 @@ router.delete('/:id', async (req, res) => {
     try{
         const id = parseInt(req.params.id)
         let result = await pool.query(`SELECT * FROM students WHERE id=${id};`)
-        if(!result.rows[0])
+        if(result.rowCount === 0)
             res.status(404).send("Invalid Id")
         result = await pool.query(`DELETE FROM students WHERE id=${id} RETURNING *;`)
         return res.status(200).json(result.rows[0])
